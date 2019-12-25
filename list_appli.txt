@@ -1,4 +1,4 @@
-nombre_applications=2
+nombre_applications=3
 name=Power Manager
 path=./power_manager
 nombre_arguments=2
