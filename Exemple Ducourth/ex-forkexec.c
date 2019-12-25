@@ -42,6 +42,7 @@ int main(int argc, char **argv)
 					fflush(stdout);
 					sleep(1);
 				}
+			break;
 		}
 
 	return EXIT_SUCCESS;
