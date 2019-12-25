@@ -1,0 +1,623 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% fphw Assignment
+% LaTeX Template
+% Version 1.0 (27/04/2019)
+%
+% This template originates from:
+% https://www.LaTeXTemplates.com
+%
+% Authors:
+% Class by Felipe Portales-Oliva (f.portales.oliva@gmail.com) with template 
+% content and modifications by Vel (vel@LaTeXTemplates.com)
+%
+% Template (this file) License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+	12pt, % Default font size, values between 10pt-12pt are allowed
+	%letterpaper, % Uncomment for US letter paper size
+	%spanish, % Uncomment for Spanish
+]{fphw}
+
+% Template-specific packages
+\usepackage[utf8]{inputenc} % Required for inputting international characters
+\usepackage[T1]{fontenc} % Output font encoding for international characters
+\usepackage{rotating}
+\usepackage{amsmath} % AMS Math
+\usepackage{verbatim}
+\usepackage{cancel}
+
+\usepackage{graphics,graphicx} % Required for including images
+\graphicspath{{images/}{../images/}}
+\usepackage{booktabs} % Required for better horizontal rules in tables	
+\usepackage{float} % Float H 
+
+\usepackage{listings} % Required for insertion of code
+\usepackage{multicol}
+\usepackage{enumerate} % To modify the enumerate environment
+
+\usepackage{pstricks}
+\usepackage{pst-node}
+\usepackage{pst-tree} % Graphes shit
+
+\usepackage{xcolor}
+\usepackage{color}
+\definecolor{darkolivegreen}{rgb}{0.33, 0.42, 0.18}
+\definecolor{background}{RGB}{39, 40, 34}
+\definecolor{string}{RGB}{230, 219, 116}
+\definecolor{comment}{RGB}{117, 113, 94}
+\definecolor{normal}{RGB}{248, 248, 242}
+\definecolor{identifier}{RGB}{166, 226, 46}
+
+\usepackage{xparse}% to define star variant of macro
+\NewDocumentCommand{\ShowListingForLineNumber}{s O{1.0} m m m}{
+    \IfBooleanTF{#1}{\vspace{-#2\baselineskip}}{}
+    \lstinputlisting[
+            style=cstyle,
+            linerange={#3-#3},
+            firstnumber=#3,
+            caption=#4
+            ]{#5}
+} %Display specific line of a file using Listings
+
+\lstdefinestyle{cstyle}{
+		language=C, % Use Perl functions/syntax highlighting
+		numbers=left, % Line-numbers position
+		captionpos=b, % Caption position
+		breaklines=true, % Automatic breakline
+		breakatwhitespace=true, % Breaks only at whitespace
+		frame=single, % Frame around the code listing
+		numbersep=5pt,	% Distance line-number to code
+		showstringspaces=false, % Don't put marks in string spaces
+		stepnumber=2, % Step for line-numbers
+		tabsize=4, % Default tabsize
+		numberstyle=\tiny\color{black}\ttfamily ,
+		backgroundcolor=\color{background}, % Background color
+		basicstyle=\color{normal}\ttfamily , % sets font style for the code
+		identifierstyle=\color{orange},
+	    keywordstyle=\color{magenta}\ttfamily ,	% sets color for keywords
+	    stringstyle=\color{string}\ttfamily ,		% sets color for strings
+	    commentstyle=\color{comment}\ttfamily ,	% sets color for comments
+		emph={format_string, eff_ana_bf, permute, eff_ana_btr},
+		emphstyle=\color{identifier}\ttfamily ,	
+		%morekeywords={Exemple}	
+		}
+
+\renewcommand\labelitemi{-}
+
+
+
+%----------------------------------------------------------------------------------------
+%	ASSIGNMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{Devoir 2} % Assignment title
+
+\author{Pascal Quach, Korantin Toczé} % Student name
+
+\institute{Université de Technologie de Compiègne} % Institute or school name
+
+\class{Maîtrise des systèmes informatiques (SR01)} % Course or class name
+
+\date{30 Décembre 2019} % Due date
+
+\semestre{A19}
+
+
+%\professor{Dr. Albert Einstein} % Professor or teacher in charge of the assignment
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle % Output the assignment title, created automatically using the information in the custom commands above
+
+%----------------------------------------------------------------------------------------
+%	ASSIGNMENT CONTENT
+%----------------------------------------------------------------------------------------
+\section*{Exercice 1 : Arbre généalogique de processus}
+
+\subsection*{Partie 1}
+\begin{itemize}
+	\item Le \texttt{PID} du \texttt{shell} est 2000.
+	\item Le \texttt{PID} du processus correspondant au parent est 2400.
+	\item La numérotation des processus est séquentielle (incrémentation par 1).
+	\item Un processus de \texttt{PID} \textit{p} ne peut être exécuté qu'après la fin de l'exécution du processus de \texttt{PID} \textit{p-1}.
+\end{itemize}
+\begin{problem}
+\centering Donner l'arbre généalogique des processus générés par chaque programme.	
+\end{problem}
+%----------------------------------------------------------------------------------------
+
+\subsubsection*{Programme 1}
+\begin{problem}
+	\lstinputlisting[
+		caption=Programme 1,% Caption above the listing
+		label=lst:prog1, % Label for referencing this listing
+		style=cstyle
+	]{prog1.c}
+\end{problem}
+\subsubsection*{Réponse}
+
+Le \textbf{ET} logique (\texttt{\&\&}) n'évalue pas la deuxième opérande si la première est fausse.
+Le \textbf{OU} logique (\texttt{||}) n'évalue pas la deuxième opérande si la première est vraie.
+La fonction \texttt{fork()} renvoie 0, donc faux, au processus fils et une valeur non nulle, donc vrai, au processus parent. 
+La figure en annexe est utile pour observer le déroulement en détail du programme.
+L'arbre généalogique des processus est donc le suivant :
+\begin{figure}
+\begin{center}
+\pstree[levelsep=50pt]{\Tcircle{2000}}{
+	\pstree{\Tcircle{2001}} {
+		\pstree{\Tcircle{2003}} {
+		}
+		\pstree{\Tcircle{2005}} {
+			\Tcircle{2006}
+		}
+	}
+	\pstree{\Tcircle{2002}} {
+		\Tcircle{2004}
+	}
+}
+\end{center}
+\caption{Arbre généalogique du programme 1}
+\end{figure}
+\newpage
+
+\begin{sidewaysfigure}[ht]
+\begin{center}
+%% (\texttt{fork()} \texttt{||} \texttt{fork}) \texttt{\&\&} (\texttt{fork()} \texttt{||} \texttt{fork()})
+
+\resizebox{\linewidth}{!}{%%%%%%%% SCALE
+\psset{radius=1pt, dotsize=1pt}
+\pstree[thislevelsep=0, edge=none, levelsep=1.5cm]{\Tn} {	
+	
+	\pstree{\fontsize{8pt}{8pt}\TR{ ({\textcolor{red}{\texttt{fork()}} \texttt{|| fork}}) \texttt{\&\&} (\texttt{fork() || fork()}) }} {
+		\fontsize{8pt}{8pt}
+		\pstree{\TR{ (\texttt{2001} \cancel{\texttt{||} \texttt{fork()}}) \texttt{\&\&} (\textcolor{red}{\texttt{fork()}} \texttt{||} \texttt{fork()}) }} {
+			\pstree{\TR{ (\texttt{2001} \cancel{\texttt{||} \texttt{fork()}}) \texttt{\&\&} (\texttt{2002} \cancel{\texttt{||} \texttt{fork()}})  }} {
+			}
+		}
+	}
+	\psset{edge=\ncline} 
+	\pstree{
+		\pstree{\Tcircle{2000}} { % Racine
+			}	
+		} {
+			\pstree{\Tcircle[name=A_0]{2000}} { % Premier fork()
+				\pstree{\Tcircle[name=A_1_pere]{2000}} { % Deuxième fork()
+					}
+				\tspace{2cm}
+				% Fils fork() n°1
+				\pstree[thislevelsep=0, edge=none, levelsep=1.5cm]{\Tn} {
+					\pstree{\fontsize{8pt}{8pt}\TR{ (\texttt{2001} \cancel{\texttt{||} \texttt{fork()}}) \texttt{\&\&} (\texttt{0} \texttt{||} \textcolor{red}{\texttt{fork()}}) }} {
+						\fontsize{8pt}{8pt}
+						\pstree{\TR{ (\texttt{2001} \cancel{\texttt{||} \texttt{fork()}}) \texttt{\&\&} (\texttt{0} \texttt{||} \texttt{2004}) }} {	
+							}
+						}
+					}
+				\pstree{\Tcircle[name=A_1_fils]{2002}} { % Troisième fork()
+					\pstree{\Tcircle[name=A_1_fils_pere]{2002}} {
+						}
+					\tspace{2cm}	
+					\pstree[thislevelsep=0, edge=none, levelsep=1.5cm]{\Tn} {
+					\pstree{\fontsize{8pt}{8pt}\TR{ (\texttt{2001} \cancel{\texttt{||} \texttt{fork()}}) \texttt{\&\&} (\texttt{0} \texttt{||} \texttt{0}) }} {
+							}
+						}
+						
+					\tspace{1.5cm}
+					\pstree{\Tcircle[name=A_1_fils_fils]{2004}}	
+						
+					}
+								
+				}
+			
+			% Premier fork fils
+			\pstree[thislevelsep=0, edge=none, levelsep=1.5cm]{\Tn} {
+				\fontsize{8pt}{8pt}
+				\pstree{\TR{ (\texttt{0} \texttt{||} \textcolor{red}{\texttt{fork()}}) \texttt{\&\&} (\texttt{fork()} \texttt{||} \texttt{fork()}) }} {
+					\pstree{\TR{ (\texttt{0} \texttt{||} \texttt{2003}) \texttt{\&\&} (\textcolor{red}{\texttt{fork()}} \texttt{||} \texttt{fork()}) }} {
+						\pstree{\TR{ (\texttt{0} \texttt{||} \texttt{2003}) \texttt{\&\&} (\texttt{2005} \cancel{\texttt{||} \texttt{fork()}}) }} {
+							}
+						}
+					}
+				}
+			\pstree{\Tcircle[name=B_0]{2001}} {
+
+				\pstree{\Tcircle[name=B_1_pere]{2001}} {
+					\pstree{\Tcircle[name=B_2_pere]{2001}} {
+						}					
+						
+%------------------------------------------------------------------------------------------------------------------------%	
+					\tspace{1.5cm}									
+					\pstree[thislevelsep=0, edge=none, levelsep=1.5cm]{\Tn} {
+					\fontsize{8pt}{8pt}
+					\pstree{\TR{ (\texttt{0} \texttt{||} \texttt{2003}) \texttt{\&\&} (\texttt{0} \texttt{||} \textcolor{red}{\texttt{fork()}})  }} {
+						\pstree{\TR{ (\texttt{0} \texttt{||} \texttt{2003}) \texttt{\&\&} (\texttt{0} \texttt{||} \texttt{2006}) }} {
+							}
+						}
+					}	
+
+					\pstree{\Tcircle[name=B_2_fils]{2005} } {
+						\tspace{1cm}
+						\pstree{\Tcircle[name=B_3_pere]{2005}} {
+							}
+						\tspace{1cm}
+%------------------------------------------------------------------------------------------------------------------------%							
+						\pstree[thislevelsep=0, edge=none, levelsep=1.5cm]{\Tn} {
+						\fontsize{8pt}{8pt}
+						\pstree{\TR{ (\texttt{0} \texttt{||} \texttt{2000}) \texttt{\&\&} (\texttt{0} \texttt{||} \texttt{0})  }} {
+							}
+						}	
+						\tspace{1cm}
+						\pstree{\Tcircle[name=B_3_fils]{2006}} {
+							}
+%------------------------------------------------------------------------------------------------------------------------%	
+
+						}
+					}
+%------------------------------------------------------------------------------------------------------------------------%						
+					
+%------------------------------------------------------------------------------------------------------------------------%						
+				\tspace{0.5cm}
+				\pstree[thislevelsep=0, edge=none, levelsep=1.5cm]{\Tn} {
+				\fontsize{8pt}{8pt}
+				\pstree{\TR{ (\texttt{0} \texttt{||} \texttt{0}) \cancel{\texttt{\&\&} (\texttt{fork()} \texttt{||} \texttt{fork()})} }} {
+					}
+				}
+				\tspace{1.5cm}
+				\pstree{\Tcircle[name=B_2_fils]{2003}} {
+					}					
+%------------------------------------------------------------------------------------------------------------------------%					
+				}
+							
+				
+				
+			}
+}
+}
+\caption{Arbre du déroulement des processus du programme 1}
+\end{center}
+\end{sidewaysfigure}
+\newpage
+
+%----------------------------------------------------------------------------------------
+
+\subsubsection*{Programme 2}
+\begin{problem}
+	\lstinputlisting[
+		caption=Programme 2,% Caption above the listing
+		label=lst:prog2, % Label for referencing this listing
+		style=cstyle
+	]{prog2.c}
+\end{problem}
+\subsubsection*{Réponse}
+La variable de la boucle \texttt{while}, \texttt{i} est présente dans le processus fils. 
+L'arbre de déroulement du programme 2 est disponible en annexe.
+L'arbre généalogique des processus est donc le suivant :
+\begin{figure}[H]
+\begin{center}
+\pstree[levelsep=50pt]{\Tcircle{2000}}{
+	\pstree{\Tcircle{2001}} {
+	}
+	\pstree{\Tcircle{2002}} {
+		\pstree{\Tcircle{2004}} {
+			\Tcircle{2007}
+		}
+		\pstree{\Tcircle{2006}} {
+			\Tcircle{2010}
+		}
+		\pstree{\Tcircle{2009}} {
+		}
+	}
+	\pstree{\Tcircle{2003}} {
+	}
+	\pstree{\Tcircle{2005}} {	
+	}
+	\pstree{\Tcircle{2008}} {
+	}
+}
+\end{center}
+\caption{Arbre généalogique du programme 2}
+\end{figure}
+\newpage
+\begin{sidewaysfigure}[ht]
+\begin{center}
+%---------------------------------------------------------------------------------------------------%
+
+\resizebox{\linewidth}{!}{%%%%%%%% SCALE
+\psset{radius=2pt, dotsize=1pt}
+\pstree[thislevelsep=0, edge=none]{\Tn} {	
+%---------------------------------------------------------------------------------------------------%	
+	\pstree{\fontsize{8pt}{8pt}\TR{ $i=0$, \textcolor{red}{\texttt{fork()}} }} {
+		\fontsize{8pt}{8pt}
+		\pstree{\TR{ $i=0$, \texttt{PID=2000}, \textcolor{red}{\texttt{fork()}} }} {
+			\pstree{\TR{ $i=1$, \texttt{PID=2000}, \textcolor{red}{\texttt{fork()}} }} {
+				\pstree{\TR{ $i=2$, \texttt{PID=2000}, \textcolor{red}{\texttt{fork()}} }} {
+					\pstree{\TR{ $i=3$, \texttt{PID=2000}, \textcolor{red}{\texttt{fork()}} }} {
+						\pstree{\TR{ $i=4$, \texttt{PID=2000} }} {
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	\psset{edge=\ncline} 
+	
+	
+	\pstree{\Tcircle[name=ROOT]{2000}} {
+	
+		\pstree{\Tcircle[name=A_pere]{2000}} {
+			\pstree{\Tcircle[name=B_0_pere]{2000}} {
+				\pstree{\Tcircle[name=C_0_pere]{2000}} {
+					\pstree{\Tcircle[name=D_0_pere]{2000}} {
+						\pstree{\Tcircle[name=E_0_pere]{2000}} {
+							}
+							
+						%---------------------------------------------------------------------------------------------------%
+						\tspace{1cm}
+						\pstree[thislevelsep=0, edge=none]{\Tn} {
+						\fontsize{8pt}{8pt}\TR{$i=4$, \texttt{PID=2008}, \textcolor{red}{\texttt{i++}} }
+							} {
+							}
+						\tspace{1cm}
+						\pstree{\Tcircle[name=E_0_fils]{2008}} {
+							}		
+						}
+					%---------------------------------------------------------------------------------------------------%		
+					\tspace{2cm}					
+					\pstree[thislevelsep=0, edge=none]{\Tn} {
+						\fontsize{8pt}{8pt}\TR{$i=3->4$, \texttt{PID=2005}, \textcolor{red}{\texttt{i++}} }
+						} {
+						}
+					\tspace{1.5cm}
+					\pstree{\Tcircle[name=D_0_fils]{2005}} {
+						}
+					%---------------------------------------------------------------------------------------------------%		
+					}
+					
+				%---------------------------------------------------------------------------------------------------%		
+				\pstree[thislevelsep=0, edge=none]{\Tn} {
+					\fontsize{8pt}{8pt}\TR{$i=2->3->4$, \texttt{PID=2003}, \textcolor{red}{\texttt{i++}} }
+					} {
+					}
+				\tspace{1.5cm}
+				\pstree{\Tcircle[name=C_0_fils]{2003}} {
+					}
+				%---------------------------------------------------------------------------------------------------%	
+				}
+				
+			%---------------------------------------------------------------------------------------------------%	
+			\pstree[thislevelsep=0, edge=none]{\Tn} {
+				\fontsize{8pt}{8pt}
+				\pstree{\TR{ $i=1$, \texttt{PID=2002}, \textcolor{red}{\texttt{fork()}} }} {
+					\pstree{\TR{ $i=2$, \texttt{PID=2002}, \textcolor{red}{\texttt{fork()}} }} {
+						\pstree{\TR{ $i=3$, \texttt{PID=2002}, \textcolor{red}{\texttt{fork()}} }} {
+							\pstree{\TR{ $i=4$, \texttt{PID=2002} }} {
+								}		
+							}
+						}
+					}
+				}
+			\tspace{1.5cm}
+			\pstree{\Tcircle[name=B_0_fils]{2002}} {
+				\pstree{\Tcircle[name=C_1_pere]{2002}} {
+					\pstree{\Tcircle[name=D_1_pere]{2002}} {
+						\pstree{\Tcircle[name=E_1_pere]{2002}} {
+							}
+						
+						%---------------------------------------------------------------------------------------------------%	
+						\tspace{1cm}						
+						\pstree[thislevelsep=0, edge=none]{\Tn} {
+						\fontsize{8pt}{8pt}\TR{$i=4$, \texttt{PID=2009} }
+							} {
+							}
+						\tspace{1.5cm}
+						\pstree{\Tcircle[name=E_1_fils]{2009}} {
+							}
+						%---------------------------------------------------------------------------------------------------%
+						}
+						
+					%---------------------------------------------------------------------------------------------------%	
+					\pstree[thislevelsep=0, edge=none]{\Tn} {
+						\fontsize{8pt}{8pt}
+						\pstree{\TR{$i=3$, \texttt{PID=2006}, \textcolor{red}{\texttt{fork()}} }} {
+							\pstree{\TR{ $i=4$, \texttt{PID=2006} }} {}
+							}
+						}
+					\tspace{1.5cm}
+					\pstree{\Tcircle[name=D_1_fils]{2006}} {
+						\pstree{\Tcircle[name=E_2_pere]{2006}} {
+							}
+						
+						%---------------------------------------------------------------------------------------------------%	
+						\tspace{1cm}
+						\pstree[thislevelsep=0, edge=none]{\Tn} {
+							\fontsize{8pt}{8pt}
+							\pstree{\TR{$i=4$, \texttt{PID=2010} }} {
+								}
+							}
+						\tspace{1cm}
+						\pstree{\Tcircle[name=E_2_fils]{2010}} {
+							}
+						%---------------------------------------------------------------------------------------------------%
+						}
+					%---------------------------------------------------------------------------------------------------%	
+					}
+					
+				%---------------------------------------------------------------------------------------------------%	
+				\pstree[thislevelsep=0, edge=none]{\Tn} {
+					\fontsize{8pt}{8pt}
+					\pstree{\TR{$i=2$, \texttt{PID=2004}, \textcolor{red}{\texttt{fork()}} }} {
+						\pstree{\TR{$i=3$, \texttt{PID=2004}, \textcolor{red}{\texttt{fork()}} }} {
+							\pstree{\TR{$i=4$, \texttt{PID=2004} }} {
+								}
+							}	
+						}
+					}
+				\pstree{\Tcircle[name=C_1_fils]{2004}} {
+					\pstree{\Tcircle[name=D_1_pere]{2004}} {
+						\pstree{\Tcircle[name=E_3_pere]{2004}} {
+							}
+						
+						%---------------------------------------------------------------------------------------------------%	
+						\tspace{1cm}
+						\pstree[thislevelsep=0, edge=none]{\Tn} {
+							\fontsize{8pt}{8pt}
+							\pstree{\TR{$i=4$, \texttt{PID=2011} }} {
+								}
+							}
+						\tspace{1cm}
+						\pstree{\Tcircle[name=E_3_fils]{2011}} {
+							}
+						%---------------------------------------------------------------------------------------------------%
+						}
+						
+					%---------------------------------------------------------------------------------------------------%	
+					\pstree[thislevelsep=0, edge=none]{\Tn} {
+					\fontsize{8pt}{8pt}\TR{$i=3->4$, \texttt{PID=2007}, \textcolor{red}{\texttt{i++}} }
+						} {
+						}
+					\tspace{1.5cm}
+					\pstree{\Tcircle[name=D_1_fils]{2007}} {
+						}
+					%---------------------------------------------------------------------------------------------------%
+					}	
+				%---------------------------------------------------------------------------------------------------%		
+				}
+			%---------------------------------------------------------------------------------------------------%	
+			}	
+		%---------------------------------------------------------------------------------------------------%
+		\pstree[thislevelsep=0, edge=none]{\Tn} {
+			\fontsize{8pt}{8pt}\TR{$i=0,1,2,3,4$, \texttt{PID=2001}, \textcolor{red}{\texttt{i++}} }
+			} {
+			}
+		\tspace{1.5cm}
+		\pstree{\Tcircle[name=A_fils]{2001}} {
+			}
+		}
+		%---------------------------------------------------------------------------------------------------%
+%---------------------------------------------------------------------------------------------------%		
+}
+\caption{Arbre du déroulement des processus du programme 2}
+\end{center}
+\end{sidewaysfigure}
+%----------------------------------------------------------------------------------------
+\newpage
+\subsection*{Partie 2}
+\begin{problem}
+En utilisant la fonction \texttt{fork()}, proposer un programme \texttt{C} permettant de générer cet arbre de processus. Pour chaque processus, afficher son \texttt{PID} et celui de son père.
+\end{problem}
+\begin{center}
+\pstree[levelsep=35pt]{\Tcircle{1}}{
+\pstree{\Tcircle{2}}{
+	\pstree{\Tcircle{6}}{
+		\pstree{\Tcircle{12}}{
+			\Tcircle{16}
+			}
+		\Tcircle{13}
+		}
+	\pstree{\Tcircle{7}}{
+		\Tcircle{14}
+		}
+	\Tcircle{8}
+	}
+\pstree{\Tcircle{3}}{
+	\pstree{\Tcircle{9}}{
+		\Tcircle{15}
+		}
+	\Tcircle{10}
+	}
+\pstree{\Tcircle{4}}{
+	\Tcircle{11} 
+	}
+\Tcircle{5}
+}
+\end{center}
+\subsubsection*{Réponse}
+
+On réalise une boucle itérative pour exécuter \texttt{fork()} successivement. 
+\lstinputlisting[
+		caption=Partie 2 - Programme en \texttt{C},% Caption above the listing
+		label=lst:part2, % Label for referencing this listing
+		style=cstyle
+	]{part2.c}
+%----------------------------------------------------------------------------------------
+\section*{Exercice 2 : Gestionnaire d'applications}
+On va programmer un gestionnaire d'applications personnalisé (\texttt{Application-Manager}). La liste des applications à lancer est stockée dans le fichier \texttt{list\_appli.txt}. Vous disposez de quelques exemples d'applications (\texttt{power\_manager.c}, \texttt{network\_manager.c}, \texttt{get\_time.c}).
+
+\subsection*{Question 1}
+Écrire un programme \texttt{ApplicationManager.c} qui doit:
+\begin{itemize}
+	\item Créer un ensemble de processus fils chacun est responsable à l'exécution d'une application.
+	\item Lors de l'arrêt d'une application, informer l'utilisateur en lui affichant le nom de l'application terminée.
+	\item S'arrêter après avoir fermer toutes les applications en cours d'exécution lors de la réception d'un ordre de mise en veille de la part de \texttt{power\_manager} (signal \texttt{\textbf{SIGUSR1}}).
+\end{itemize}
+\textbf{NB} : Lorsque \texttt{ApplicationManager} reçoit un signal \texttt{\textbf{SIGUSR1}} de la part d'un autre processus, il ne ferme pas les applications.
+\subsection*{Réponse}
+%----------------------------------------------------------------------------------------
+
+\subsection*{Question 2}
+Modifier le programme \texttt{power\_manager.c} pour envoyer le signal \texttt{\textbf{SIGUSR1}} à l'\texttt{ApplicationManager} lorsque l'utilisateur tape 1 dans le fichier \texttt{mise\_en\_veille.txt}.
+
+\subsection*{Réponse}
+
+%----------------------------------------------------------------------------------------
+
+\section*{Exercice 3}
+L'objectif de cet exercice est de paralléliser le calcul de la somme ou le produit de deux matrices.
+La somme et le produit doivent se faire en parallèle, donc une approche dans laquelle le processus père attend la fin du traitement réalisé par un fils afin d'en créer un autre ne sera pas acceptée.
+L'écriture et la lecture des fichiers doivent se faire en utilisant \texttt{fread()} et \texttt{fwrite()}.
+\subsection*{Question 1}
+\begin{problem}
+Créez un programme \texttt{Somme.c}. Lors de l'implémentation de ce programme, supposez que les matrices sont déjà saisies dans les fichiers.
+\begin{itemize}
+	\item Il reçoit en paramètres dans la fonction \texttt{main} :
+	\begin{itemize}
+		\item deux chemins vers deux fichiers binaires contenant chacun une matrice carrée de la même taille 
+		\item le nombre de lignes $N$ d'une des matrices. 
+	\end{itemize}
+	\item Dans le programme \texttt{Somme.c}, on commence par lire les deux matrices. 
+	\item Ensuite, on crée $N$ processus fils. Chaque processus fils $i$ :
+	\begin{itemize}
+		\item calcule la somme des $i$ème lignes des deux matrices;
+		\item communique le résultat au processus père en utilisant les pipes. 
+	\end{itemize} 
+	\item Une fois que le processus père récupère la somme de chaque ligne, il affiche la matrice résultante.
+\end{itemize}
+\end{problem}
+\subsection*{Réponse}
+%----------------------------------------------------------------------------------------
+\subsection*{Question 2}
+\begin{problem}
+De même, créez un programme \texttt{Produit.c} qui reçoit les mêmes paramètres que le programme \texttt{Somme.c} mais qui effectue le produit de deux matrices. 
+\begin{itemize}
+	\item Dans le programme \texttt{Produit.c}, vous devez créer $N$ processus fils, tout comme le programme \texttt{Somme.c}.
+	\item Cependant, chaque processus fils va calculer le produit de la $i$ème ligne de la première matrice avec toutes les colonnes de la deuxième matrice.
+	\item Ensuite, il communique le résultat au processus père.
+	\item Une fois que le processus père récupère la somme de chaque ligne, il affiche la matrice résultante.
+\end{itemize}
+\end{problem}
+\subsection*{Réponse}
+%----------------------------------------------------------------------------------------
+\subsection*{Question 3}
+\begin{problem}
+Créez un programme \texttt{ManipMatrice.c} qui permet de :
+	\begin{itemize}
+		\item saisir des matrices ou de les générer aléatoirement,
+		\item de les stocker dans des fichiers binaires,
+		\item et de faire appel en utilisant \texttt{execv()}, aux programmes \texttt{Somme.c} ou \texttt{Produit.c} selon le choix de l'utilisateur.
+	\end{itemize}
+\end{problem}
+\subsection*{Réponse}
+	%----------------------------------------------------------------------------------------
+%	ASSIGNMENT CONTENT
+%----------------------------------------------------------------------------------------
+
+\end{document}
