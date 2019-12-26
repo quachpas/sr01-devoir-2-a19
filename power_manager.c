@@ -19,7 +19,9 @@ void main (int argc , char *argv[]) {
 	  fp = fopen (argv[1], "w"); 
 	  fputs("0", fp);
    	  fclose(fp);
-       }
-       sleep(atoi(argv[2]));
+	}
+	printf("[power_manager]Je vais dormir pendant %d secondes.\n", argv[2]);
+	sleep(atoi(argv[2]));
+	
  }
 }

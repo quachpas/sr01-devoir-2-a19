@@ -1,6 +1,7 @@
 //ApplicationManager.c
 #include <sys/types.h>  /* Types pid_t... */
 #include <unistd.h>     /* fork()... */
+#include <signal.h>     /* sigaction... */
 #include <stdio.h>      /* printf... */
 #include <stdlib.h>     /* EXIT_FAILURE... */
 #include <string.h>
@@ -8,8 +9,47 @@
 // To do : lecture list_appli.txt
 // intégration des données aux exécutions
 #define DUREE 1000
+pid_t pid;
+
+void terminer(void)
+{
+	printf("\nTerminaison du processus %d", pid);
+}
+
+void quitter(void)
+{
+	printf("\nFin\n");
+	exit(EXIT_SUCCESS);
+}
+
+void intercepter(int n)
+{
+    int i;
+
+    printf("\nRéception du signal %d (INT=%d, TERM=%d, QUIT=%d)", n, SIGINT, SIGTERM, SIGQUIT);
+    // (INT=2, TERM=15, QUIT=3)
+	switch ( n )
+		{
+		case SIGTERM:
+			terminer();
+		case SIGINT:
+		case SIGQUIT:
+			quitter();
+		}
+
+	printf("\nFin du handler");
+	
+}
+
+
+
 int main(int argc, char const *argv[])
 {
+    /* GESTION DES PROCESSUS */
+    struct sigaction S;
+    S.sa_handler = intercepter; 
+    // La fonction qui s'occupe des sig est intercepter()
+
     /* LECTURE LIST_APPLI.TXT */
     char buff[50];
     char nom[50];
@@ -17,7 +57,6 @@ int main(int argc, char const *argv[])
     char nombre_arg[50];
     char args[50];
     char *ptr;
-    char blank[1]={' '};
     int nombre_app;
     int i=0; // ID du processus en cours = ID de l'app
     int j,k;
@@ -42,22 +81,32 @@ int main(int argc, char const *argv[])
                 // printf("%d", i); // Testing
                 fgets(buff, 100, pnt);
                 strcpy(nom, strrchr(buff, '=')+1);
-
+                strrchr(nom, '\n')[0]='\0'; // On supprime le '\n'
+                
                 fgets(buff, 100, pnt);
                 strcpy(path, strrchr(buff, '=')+1);
+                strrchr(path, '\n')[0]='\0';
 
                 fgets(buff, 100, pnt);
                 strcpy(nombre_arg, strrchr(buff, '=')+1);
+                strrchr(nombre_arg, '\n')[0]='\0';
 
                 fgets(buff, 100, pnt); // suivant 
-                fgets(buff, 100, pnt); // Sauter 'arguments='
-                strcpy(args, buff); // Copier le premier arg                
-                fflush(stdout);
-                for (j=2;j<=atoi(nombre_arg);j++) {
-                    fgets(buff, 100, pnt); // Suivant
-                    ptr = strrchr(args, '\n'); // 
-                    strcpy(ptr, &blank[0]); // Copie très bizzare du 'blanc', qui rajoute l'argument suivant :(
-                    // strcpy(ptr+1, buff); // Ligne inutile du coup          
+                if (atoi(nombre_arg)>0) 
+                {
+                    fgets(buff, 100, pnt); // Sauter 'arguments='
+                    strcpy(args, buff); // Copier le premier arg                
+                    strrchr(args, '\n')[0]=' ';
+                    fflush(stdout); 
+                    for (j=2;j<=atoi(nombre_arg);j++) {
+                        fgets(buff, 100, pnt); // Suivant
+                        strcpy(strrchr(args, ' ')+1, buff); // Ligne inutile du coup          
+                        strrchr(args, '\n')[0]=' ';
+                    }
+                    strrchr(args, ' ')[0]='\0';
+                }
+                else {
+                    args[0]='\0';
                 }
                 n = fgets(buff, 100, pnt); // On passe à la ligne suivante
                 // C'est normalement un '\n', on sort du while ! On passe à l'app suivante.
@@ -68,7 +117,10 @@ int main(int argc, char const *argv[])
             i++; // On a fini de lire une app, donc on incrémente le compteur.
             if (pid_fils > 0) {
                 // Si on est le parent, on continue à lire
-                fgets(buff, 100, pnt);
+                if (i < nombre_app)
+                {
+                    strrchr(buff, '\n')[0] = '\0';
+                }
             }
             else {
                 // Si on est le fils, on va éxécuter le programme
@@ -102,12 +154,8 @@ int main(int argc, char const *argv[])
         return EXIT_SUCCESS;
     default:
         // Sinon, traitement généralisé pour lancer les applications.
-        for (k = DUREE; k > 0; k--)
-        {
-            printf("(fils n°%d)Processus fils vit encore %d secondes\nMon PID est %d\n", i, k, getpid());
-            fflush(stdout);
-            sleep(1);
-        }
+        printf("[%s] Je suis le processus de PID %d.\n", nom, getpid());
+        printf("Je vais exécuter la commande suivante :\n%s %s", path, args);    
     }
     
     return EXIT_SUCCESS;

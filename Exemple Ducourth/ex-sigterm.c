@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 			perror("sigaction");
 			exit(EXIT_FAILURE);
 		}
-	
+	intercepter(atoi(argv[2]));
 	for(i=atoi(argv[1]); i>0; i--)
 		{
 			printf("\nLe processus %d est vivant pour encore %d secondes.", pid, i);

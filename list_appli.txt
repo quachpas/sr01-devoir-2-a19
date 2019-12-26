@@ -1,12 +1,10 @@
 nombre_applications=3
 name=Power Manager
 path=./power_manager
-nombre_arguments=4
+nombre_arguments=2
 arguments=
 ./mise_en_veille.txt
 4
-test
-test2
 
 name=Get Time
 path =./get_time
