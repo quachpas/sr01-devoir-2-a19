@@ -1,5 +1,6 @@
 #include <signal.h>    /* sigaction... */
-#include <sys/types.h>  /* Types pid_t... */
+#include <sys/types.h> /* Types pid_t... */
+#include <sys/wait.h>  /* wait */
 #include <unistd.h>     /* fork()... */
 #include <stdio.h>      /* printf... */
 #include <stdlib.h>     /* EXIT_FAILURE... */
