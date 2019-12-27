@@ -203,7 +203,7 @@ int main(int argc, char const *argv[])
         else {
             // PERE 
             //printf("<------ PID_FILS=%d ------>\n", pid_fils);
-            sleep(1);
+            sleep(2);
             close(fd[1]); // Fermer l'écriture pour le père
         }
         
