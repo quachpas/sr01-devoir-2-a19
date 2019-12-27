@@ -33,22 +33,22 @@ void intercepter(int n)
 	else 
 		{
             printf("<----- PID=%d ------->\n", pid_fils);
-            //printf("<----- WIFEXITED=%d -------->\n", WIFEXITED(statut_fils));
+            printf("<----- WIFEXITED=%d -------->\n", WIFEXITED(statut_fils));
 			if( WIFEXITED(statut_fils) != 0 )
 				{
 					printf("\n[%s] Fin normale du fils (%d) avec code retour %d\n\n", name, pid_fils, WEXITSTATUS(statut_fils));
 				}
-            //printf("<----- WIFSIGNALED=%d ------>\n", WIFSIGNALED(statut_fils));
+            printf("<----- WIFSIGNALED=%d ------>\n", WIFSIGNALED(statut_fils));
 			if( WIFSIGNALED(statut_fils) != 0 )
 				{
 					printf("\n[%s] Fin du fils (%d) via signal %d non intercepte\n\n", name, pid_fils, WTERMSIG(statut_fils));
 				}
-            //printf("<------ WIFSTOPPED=%d ------>\n", WIFSTOPPED(statut_fils));
+            printf("<------ WIFSTOPPED=%d ------>\n", WIFSTOPPED(statut_fils));
 			if( WIFSTOPPED(statut_fils) != 0 )
 				{
 					printf("\n[%s] Processsus fils (%d) stoppe par signal %d\n\n", name, pid_fils, WSTOPSIG(statut_fils));
 				}
-            //printf("<----- WIFCONTINUED=%d ----->\n", WIFCONTINUED(statut_fils));
+            printf("<----- WIFCONTINUED=%d ----->\n", WIFCONTINUED(statut_fils));
 			if( WIFCONTINUED(statut_fils) != 0 )
 				{
 					printf("\n[%s] Processus fils (%d) continue\n\n", name, pid_fils);
