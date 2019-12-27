@@ -193,6 +193,7 @@ int main(int argc, char const *argv[])
         tab_pid_fils[l]=pid_fils;
         if(pid_fils == 0)
         {
+            // FILS
             close(fd[0]); // Fermer lecture pour le fils
             // On sort de la boucle
             id_processus = l;
@@ -200,9 +201,9 @@ int main(int argc, char const *argv[])
             l = nombre_app;
         }
         else {
+            // PERE 
             //printf("<------ PID_FILS=%d ------>\n", pid_fils);
-            int statut_fils;
-            //while(waitpid(pid_fils, statut_fils, WNOHANG) > 0);
+            sleep(1);
             close(fd[1]); // Fermer l'écriture pour le père
         }
         
@@ -222,7 +223,7 @@ int main(int argc, char const *argv[])
         printf("Je vais exécuter la commande suivante :\n%s %s\n\n", path[id_processus], args[id_processus]);    
         strcpy(s_path, path[id_processus]);
         strcpy(s_args, args[id_processus]);
-        write(fd[1], nom[id_processus], strlen(nom[id_processus])+1);
+        write(fd[1], nom[id_processus], strlen(nom[id_processus])+1); // On passe le nom de l'app à intercepter
         execl(s_path, s_args);
         
         return CODE_RETOUR_FILS;
