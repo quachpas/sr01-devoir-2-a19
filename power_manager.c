@@ -20,8 +20,7 @@ void main (int argc , char *argv[]) {
 	  fputs("0", fp);
    	  fclose(fp);
 	}
-	printf("[power_manager]Je vais dormir pendant %d secondes.\n", argv[2]);
+	printf("[power_manager]Je vais dormir pendant %d secondes.\n", atoi(argv[2]));
 	sleep(atoi(argv[2]));
-	
  }
 }

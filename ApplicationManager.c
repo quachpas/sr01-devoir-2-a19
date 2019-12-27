@@ -33,22 +33,22 @@ void intercepter(int n)
 	else 
 		{
             printf("<----- PID=%d ------->\n", pid_fils);
-            printf("<----- WIFEXITED=%d -------->\n", WIFEXITED(statut_fils));
+            //printf("<----- WIFEXITED=%d -------->\n", WIFEXITED(statut_fils));
 			if( WIFEXITED(statut_fils) != 0 )
 				{
 					printf("\n[%s] Fin normale du fils (%d) avec code retour %d\n\n", name, pid_fils, WEXITSTATUS(statut_fils));
 				}
-            printf("<----- WIFSIGNALED=%d ------>\n", WIFSIGNALED(statut_fils));
+            //printf("<----- WIFSIGNALED=%d ------>\n", WIFSIGNALED(statut_fils));
 			if( WIFSIGNALED(statut_fils) != 0 )
 				{
 					printf("\n[%s] Fin du fils (%d) via signal %d non intercepte\n\n", name, pid_fils, WTERMSIG(statut_fils));
 				}
-            printf("<------ WIFSTOPPED=%d ------>\n", WIFSTOPPED(statut_fils));
+            //printf("<------ WIFSTOPPED=%d ------>\n", WIFSTOPPED(statut_fils));
 			if( WIFSTOPPED(statut_fils) != 0 )
 				{
 					printf("\n[%s] Processsus fils (%d) stoppe par signal %d\n\n", name, pid_fils, WSTOPSIG(statut_fils));
 				}
-            printf("<----- WIFCONTINUED=%d ----->\n", WIFCONTINUED(statut_fils));
+            //printf("<----- WIFCONTINUED=%d ----->\n", WIFCONTINUED(statut_fils));
 			if( WIFCONTINUED(statut_fils) != 0 )
 				{
 					printf("\n[%s] Processus fils (%d) continue\n\n", name, pid_fils);
@@ -201,6 +201,8 @@ int main(int argc, char const *argv[])
         }
         else {
             //printf("<------ PID_FILS=%d ------>\n", pid_fils);
+            int statut_fils;
+            //while(waitpid(pid_fils, statut_fils, WNOHANG) > 0);
             close(fd[1]); // Fermer l'écriture pour le père
         }
         
@@ -220,7 +222,6 @@ int main(int argc, char const *argv[])
         printf("Je vais exécuter la commande suivante :\n%s %s\n\n", path[id_processus], args[id_processus]);    
         strcpy(s_path, path[id_processus]);
         strcpy(s_args, args[id_processus]);
-        
         write(fd[1], nom[id_processus], strlen(nom[id_processus])+1);
         execl(s_path, s_args);
         
