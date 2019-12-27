@@ -593,6 +593,16 @@ Créez un programme \texttt{Somme.c}. Lors de l'implémentation de ce programme,
 \end{itemize}
 \end{problem}
 \subsection*{Réponse}
+
+On commence par une lecture des fichiers passés en arguments du main, puis on les stocke dans un tableau.
+On crée ensuite n tableaux pour n pipes, un par processus.
+Ensuite, on crée un processus par ligne qui calcule la somme des éléments, puis l'on écrit dans le pipe de ce processus.
+Enfin, on lit tous les résultats et on les affiche.
+\lstinputlisting[
+		caption=Programme Somme.c,% Caption above the listing
+		label=lst:somme, % Label for referencing this listing
+		style=cstyle
+	]{Somme.c}
 %----------------------------------------------------------------------------------------
 \subsection*{Question 2}
 \begin{problem}
@@ -605,6 +615,13 @@ De même, créez un programme \texttt{Produit.c} qui reçoit les mêmes paramèt
 \end{itemize}
 \end{problem}
 \subsection*{Réponse}
+
+Seul le calcul est différent du proogramme précédent, on ajoute une boucle pour parcourir toutes les colonnes de la première matrice et toutes les lignes de la seconde à chaque itération.
+\lstinputlisting[
+		caption=Programme Produit.c,% Caption above the listing
+		label=lst:produit, % Label for referencing this listing
+		style=cstyle
+	]{Produit.c}
 %----------------------------------------------------------------------------------------
 \subsection*{Question 3}
 \begin{problem}
@@ -616,6 +633,14 @@ Créez un programme \texttt{ManipMatrice.c} qui permet de :
 	\end{itemize}
 \end{problem}
 \subsection*{Réponse}
+
+Dans cette question, on va demander à l'utilisateur d'entrer deux matrices (stockées dans les fichiers "matrice1" et "matrice2"). On supposera les deux programmes déja compilés dans le même dossier sous le nom "Somme" et "Produit". On génere alors les matrices aléatoirement ou selon les entrées utilisateurs, puis on appelle les programmes précédents en utilisant execv.
+\lstinputlisting[
+		caption=Programme ManipMatrice.c,% Caption above the listing
+		label=lst:manip, % Label for referencing this listing
+		style=cstyle
+	]{ManipMatrice.c}
+	
 	%----------------------------------------------------------------------------------------
 %	ASSIGNMENT CONTENT
 %----------------------------------------------------------------------------------------
