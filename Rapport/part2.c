@@ -7,6 +7,7 @@ int main()
         int n = fork();
         if (n > 0) {
             printf("[parent][PID=%d] Le PID de mon fils est : %d.\n", getpid(), n);
+            sleep(1);
         }
         else {
             printf("[fils][PID=%d] Le PID de mon père est : %d.\n", getpid(), getppid());
