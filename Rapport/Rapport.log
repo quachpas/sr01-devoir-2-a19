@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (MiKTeX 2.9.7200 64-bit) (preloaded format=xelatex 2019.12.18)  25 DEC 2019 12:08
+This is XeTeX, Version 3.14159265-2.6-0.999991 (MiKTeX 2.9.7200 64-bit) (preloaded format=xelatex 2019.12.18)  27 DEC 2019 10:15
 entering extended mode
 **./Rapport.tex
 (Rapport.tex
@@ -768,14 +768,25 @@ File: lstmisc.sty 2019/09/10 1.8c (Carsten Heinz)
 ] (prog2.c) [2] [3] (part2.c) [4]
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <12> not available
 (Font)              Font shape `T1/lmtt/b/n' tried instead on input line 560.
- [5] [6] [7] [8] (Rapport.aux) ) 
+ [5] (Somme.c [6] [7]) [8]
+(Produit.c [9]
+Overfull \hbox (4.1818pt too wide) in paragraph at lines 68--69
+[][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][][
+][][][][][][][][][][][] 
+ []
+
+[10]) [11] [12] (ManipMatrice.c [13] [14]) [15] [16] [17] (Rapport.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 22213 strings out of 427243
- 395166 string characters out of 3145774
- 696936 words of memory out of 3000000
- 26499 multiletter control sequences out of 15000+200000
+ 22358 strings out of 427243
+ 396608 string characters out of 3145774
+ 707964 words of memory out of 3000000
+ 26635 multiletter control sequences out of 15000+200000
  570840 words of font info for 52 fonts, out of 3000000 for 9000
  1348 hyphenation exceptions out of 8191
- 45i,21n,97p,580b,1512s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 45i,21n,97p,580b,1910s stack positions out of 5000i,500n,10000p,200000b,50000s
 
-Output written on Rapport.pdf (8 pages).
+Output written on Rapport.pdf (17 pages).
