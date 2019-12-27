@@ -6,10 +6,10 @@ int main()
     for (size_t i = 1; i < 5; i++) {
         int n = fork();
         if (n > 0) {
-            printf("Je suis le parent.\n Le PID de mon père est : %d.\n Le PID de mon fils est : %d.\n", getppid(), getpid());
+            printf("[parent][PID=%d] Le PID de mon fils est : %d.\n", getpid(), n);
         }
         else {
-            printf("Je suis le fils.\n Le PID de mon père est : %d.\n Le PID de mon fils est : %d.\n", getppid(), getpid());
+            printf("[fils][PID=%d] Le PID de mon père est : %d.\n", getpid(), getppid());
         }
     }
     return EXIT_SUCCESS;
