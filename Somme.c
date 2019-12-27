@@ -5,6 +5,10 @@
 
 int main(int argc, char const *argv[])
 {
+  if (argc < 3 ) {
+    printf("Usage : ./Somme matrice1 matrice 2 n\n\n");
+    return EXIT_FAILURE;
+  }
   FILE* f;
   f=fopen(argv[1],"rb");
   int n=atof(argv[3]);//recuperation du n
