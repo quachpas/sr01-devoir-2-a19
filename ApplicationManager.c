@@ -1,9 +1,10 @@
 
 //ApplicationManager.c
+#include <unistd.h>     /* fork()... */
 #include <signal.h>     /* sigaction... */
 #include <sys/wait.h>  /* wait */
 #include <sys/types.h>  /* Types pid_t... */
-#include <unistd.h>     /* fork()... */
+
 #include <stdio.h>      /* printf... */
 #include <stdlib.h>     /* EXIT_FAILURE... */
 #include <string.h>     /* string */
@@ -12,36 +13,45 @@
 #define DUREE 10
 
 pid_t pid, pid_fils;
+int fd[2];
 
 void intercepter(int n)
 {
     int i, statut_fils;
+    char name[50];
 
-    printf("\n (PID=%d SIGCHLD=%d ) Réception du signal %d pour fils %d\n", pid, SIGCHLD, n, pid_fils);
+    printf("\n (PID=%d SIGCHLD=%d ) Réception du signal %d\n\n", pid, SIGCHLD, n);
     // (INT=2, TERM=15, QUIT=3)
 	/* Attente bloquante du fils */
-	if ( waitpid(pid_fils, &statut_fils, WUNTRACED | WCONTINUED | WNOHANG) == -1 )
-		{
-			perror("intercepter/waitpid");
-            printf("\n");
-		}
+    read(fd[0], name, 50*sizeof(char));    
+	if ( waitpid(pid_fils, statut_fils, WUNTRACED | WCONTINUED | WNOHANG) == -1 )
+    {
+        printf("<------------- %s ------------>\n ", name);
+        perror("intercepter/waitpid");  
+        printf("\n");
+    }
 	else 
 		{
+            printf("<----- PID=%d ------->\n", pid_fils);
+            printf("<----- WIFEXITED=%d -------->\n", WIFEXITED(statut_fils));
 			if( WIFEXITED(statut_fils) != 0 )
 				{
-					printf("\nFin normale du fils (%d) avec code retour %d\n\n", pid_fils, WEXITSTATUS(statut_fils));
+					printf("\n[%s] Fin normale du fils (%d) avec code retour %d\n\n", name, pid_fils, WEXITSTATUS(statut_fils));
 				}
+            printf("<----- WIFSIGNALED=%d ------>\n", WIFSIGNALED(statut_fils));
 			if( WIFSIGNALED(statut_fils) != 0 )
 				{
-					printf("\nFin du fils (%d) via signal %d non intercepte\n\n", pid_fils, WTERMSIG(statut_fils));
+					printf("\n[%s] Fin du fils (%d) via signal %d non intercepte\n\n", name, pid_fils, WTERMSIG(statut_fils));
 				}
+            printf("<------ WIFSTOPPED=%d ------>\n", WIFSTOPPED(statut_fils));
 			if( WIFSTOPPED(statut_fils) != 0 )
 				{
-					printf("\nProcesssus fils (%d) stoppe par signal %d\n\n", pid_fils, WSTOPSIG(statut_fils));
+					printf("\n[%s] Processsus fils (%d) stoppe par signal %d\n\n", name, pid_fils, WSTOPSIG(statut_fils));
 				}
+            printf("<----- WIFCONTINUED=%d ----->\n", WIFCONTINUED(statut_fils));
 			if( WIFCONTINUED(statut_fils) != 0 )
 				{
-					printf("\nProcesssus fils (%d) continue\n\n", pid_fils);
+					printf("\n[%s] Processus fils (%d) continue\n\n", name, pid_fils);
 				}
 		}
 }
@@ -54,6 +64,15 @@ int double_pointer_malloc(char **tab, int taille)
     }
     
 }
+
+void double_pointer_free(char **tab, int taille)
+{
+    for (size_t i = 0; i < taille; i++)
+    {
+        free(tab[i]);
+    }
+}
+
 
 int main(int argc, char const *argv[])
 {
@@ -97,13 +116,14 @@ int main(int argc, char const *argv[])
     nombre_app = atoi(strrchr(buff, '=')+1); // On récupère le nombre d'app
     /* INITIALISATION DES TABLEAUX */
     tab_pid_fils = malloc(nombre_app*sizeof(int));
-    nom = malloc(nombre_app*sizeof(char));
+
+    nom = malloc(nombre_app*sizeof(char*));
     double_pointer_malloc(nom, nombre_app);
-    path = malloc(nombre_app*50*sizeof(char));
+    path = malloc(nombre_app*sizeof(char*));
     double_pointer_malloc(path, nombre_app);
-    nombre_arg = malloc(nombre_app*50*sizeof(char));
+    nombre_arg = malloc(nombre_app*sizeof(char*));
     double_pointer_malloc(nombre_arg, nombre_app);
-    args = malloc(nombre_app*50*sizeof(char));
+    args = malloc(nombre_app*sizeof(char*));
     double_pointer_malloc(args, nombre_app);
     // printf("%d", nombre_app); // testing
     while (est_parent)
@@ -168,16 +188,22 @@ int main(int argc, char const *argv[])
     // Le père arrive à la fin de la lecture du fichier donc.
     for (size_t l = 0; l < nombre_app; l++)
     {
-        sleep(1);
+        pipe(fd);
         pid_fils=fork();
         tab_pid_fils[l]=pid_fils;
         if(pid_fils == 0)
         {
+            close(fd[0]); // Fermer lecture pour le fils
             // On sort de la boucle
             id_processus = l;
+            //printf("<------ [PID=%d] ID_PROCESSUS=%d ------>\n", getpid(), id_processus);
             l = nombre_app;
-            
         }
+        else {
+            //printf("<------ PID_FILS=%d ------>\n", pid_fils);
+            close(fd[1]); // Fermer l'écriture pour le père
+        }
+        
     }
 
     switch (pid_fils)
@@ -188,20 +214,25 @@ int main(int argc, char const *argv[])
 
     case (pid_t)0:
         // Sinon, traitement généralisé pour lancer les applications.
-        printf("[id_proc=%d][i=%d]\n", id_processus, i);
-        printf("[%s][%d]\n", nom[id_processus], getpid());
+        sleep(2);
+        printf("<-------------- %s ------------>\n", nom[id_processus]);
+        printf("[id_proc=%d][%s][%d]\n", id_processus, nom[id_processus], getpid());
         printf("Je vais exécuter la commande suivante :\n%s %s\n\n", path[id_processus], args[id_processus]);    
         strcpy(s_path, path[id_processus]);
         strcpy(s_args, args[id_processus]);
+        
+        write(fd[1], nom[id_processus], strlen(nom[id_processus])+1);
         execl(s_path, s_args);
+        
         return CODE_RETOUR_FILS;
     default:
         // Le père !
         // id = nombre app + 1
         // Le parent reste ici :) jusqu'au sigterm, à changer plus tard
         
-        
-       sleep(1);
+        //printf("<-------------- %s ------------>\n", nom[id_processus]);
+        //write(fd[1], nom[id_processus], strlen(nom[id_processus])+1);
+        sleep(1);
             int k = 0;
             int pas = 10;
 
@@ -226,8 +257,18 @@ int main(int argc, char const *argv[])
                 {
                     kill(tab_pid_fils[l], SIGTERM);
                 }
+                
             }      
     }
-    
+    free(tab_pid_fils);
+    double_pointer_free(nom, nombre_app);
+    free(nom);
+    double_pointer_free(path, nombre_app);
+    free(path);
+    double_pointer_free(nombre_arg, nombre_app);
+    free(nombre_arg);
+    double_pointer_free(args, nombre_app);
+    free(args);
+
     return EXIT_SUCCESS;
 }
