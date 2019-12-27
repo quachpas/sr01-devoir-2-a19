@@ -17,40 +17,29 @@ void intercepter(int n)
 {
     int i, statut_fils;
 
-    printf("\n (PID=%d SIGCHLD=%d ) Réception du signal %d (INT=%d, TERM=%d, QUIT=%d)", pid, SIGCHLD, n, SIGINT, SIGTERM, SIGQUIT);
+    printf("\n (PID=%d SIGCHLD=%d ) Réception du signal %d ", pid, SIGCHLD, n);
     // (INT=2, TERM=15, QUIT=3)
 	/* Attente bloquante du fils */
-	if ( waitpid(pid_fils, &statut_fils, WUNTRACED | WCONTINUED) == -1 )
-		{
-			perror("intercepter/waitpid");
-		}
-	else 
-		{
-			if( WIFEXITED(statut_fils) != 0 )
-				{
-					printf("\nFin normale du fils (%d) avec code retour %d\n\n", pid_fils, WEXITSTATUS(statut_fils));
-				}
-			if( WIFSIGNALED(statut_fils) != 0 )
-				{
-					printf("\nFin du fils (%d) via signal %d non intercepte\n\n", pid_fils, WTERMSIG(statut_fils));
-				}
-			if( WIFSTOPPED(statut_fils) != 0 )
-				{
-					printf("\nProcesssus fils (%d) stoppe par signal %d\n\n", pid_fils, WSTOPSIG(statut_fils));
-				}
-			if( WIFCONTINUED(statut_fils) != 0 )
-				{
-					printf("\nProcesssus fils (%d) continue\n\n", pid_fils);
-				}
-		}
-}
-
-void no_zombi(struct sigaction S) 
-{
-    if( sigaction(SIGCHLD, &S, NULL) != 0 )
+	while ( waitpid(pid_fils, &statut_fils, WUNTRACED | WCONTINUED | WNOHANG) == -1 )
     {
-        perror("sigaction");
+        if( WIFEXITED(statut_fils) != 0 )
+            {
+                printf("\nFin normale du fils (%d) avec code retour %d\n\n", pid_fils, WEXITSTATUS(statut_fils));
+            }
+        if( WIFSIGNALED(statut_fils) != 0 )
+            {
+                printf("\nFin du fils (%d) via signal %d non intercepté\n\n", pid_fils, WTERMSIG(statut_fils));
+            }
+        if( WIFSTOPPED(statut_fils) != 0 )
+            {
+                printf("\nProcesssus fils (%d) stoppé par signal %d\n\n", pid_fils, WSTOPSIG(statut_fils));
+            }
+        if( WIFCONTINUED(statut_fils) != 0 )
+            {
+                printf("\nProcesssus fils (%d) continue\n\n", pid_fils);
+            }
     }
+    perror("intercepter/waitpid");
 }
 
 int double_pointer_malloc(char **tab, int taille) 
@@ -66,16 +55,24 @@ int main(int argc, char const *argv[])
 {
     /* GESTION DES PROCESSUS */
     struct sigaction S;
-    S.sa_handler = intercepter;
-
+    S.sa_handler = SIG_IGN;
+    sigemptyset(&S.sa_mask);
+    S.sa_flags = SA_RESTART | SA_NOCLDSTOP | SA_NOCLDWAIT;
+    if( sigaction(SIGTERM, &S, NULL) != 0 || sigaction(SIGQUIT, &S, NULL) != 0 || sigaction(SIGINT, &S, NULL) != 0)
+    {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
     // La fonction qui s'occupe des sig est intercepter()
     pid = getpid();
+
     /* LECTURE LIST_APPLI.TXT */
     char buff[50]; // Buffer
     char **nom;
     char **path;
     char **nombre_arg;
     char **args;
+    
     int who_am_i;
     char *ptr;
     int nombre_app;
@@ -164,11 +161,14 @@ int main(int argc, char const *argv[])
     /* EXECUTION MANAGER */
     // Si tout se passe bien, les processus fils sont censé arriver là.
     // Le père arrive à la fin de la lecture du fichier donc.
+
+    
+
     for (size_t l = 0; l < nombre_app; l++)
     {
         pid_fils=fork();
         tab_pid_fils[l]=pid_fils;
-        if(pid_fils == 0)
+        if (pid_fils == 0)
         {
             // On sort de la boucle
             id_processus = l;
@@ -178,49 +178,44 @@ int main(int argc, char const *argv[])
 
     switch (pid_fils)
     {
-    case (pid_t)-1: 
-        perror("main/fork");
-        return EXIT_FAILURE;
+        case (pid_t)-1: 
+            perror("main/fork");
+            return EXIT_FAILURE;
 
-    case (pid_t)0:
-        // Sinon, traitement généralisé pour lancer les applications.
-        printf("[id_proc=%d][i=%d]\n", id_processus, i);
-        printf("[%s][%d]\n", nom[id_processus], getpid());
-        printf("Je vais exécuter la commande suivante :\n%s %s\n\n", path[id_processus], args[id_processus]);    
-        execl(path[id_processus], args[id_processus]);
-        return CODE_RETOUR_FILS;
-    default:
-        // Le père !
-        // id = nombre app + 1
-        // Le parent reste ici :) jusqu'au sigterm, à changer plus tard
-        
-        
-        sleep(4); // Délai initial
-        for (k = DUREE; k > 0; k=k-5)
-        {
-            if( sigaction(SIGCHLD, &S, NULL) != 0 )
+        case (pid_t)0:
+            // Sinon, traitement généralisé pour lancer les applications.
+            printf("[id_proc=%d]\n", id_processus);
+            printf("[%s][%d]\n", nom[id_processus], getpid());
+            printf("Je vais exécuter la commande suivante :\n%s %s\n\n", path[id_processus], args[id_processus]);    
+            execl(path[id_processus], args[id_processus]);
+            return CODE_RETOUR_FILS;
+
+        default:
+            sleep(1);
+            int k = 0;
+            int pas = 10;
+
+            //sleep(pas); // Délai initial
+            while(1)
             {
-                perror("sigaction");
-            }
-            printf("\n\n(parent)Processus père vit encore %d secondes\nMon PID est %d\n\n", k, getpid());
-            printf("Mes fils sont : ");
-            for (size_t l = 0; l < nombre_app; l++)
-            {
-                printf("%d ", tab_pid_fils[l]);
-            }
-            printf("\n");
-               
-            fflush(stdout); 
-            sleep(5);
-        }     
-        // Tuer tous les fils   
-        for (size_t l = 0; l < nombre_app; l++)
-        {
-            kill(tab_pid_fils[l], SIGTERM);
-        }
-        
-    
+                
+                printf("\n\n[parent][PID=%d]Processus père vit depuis %d secondes\n", getpid(), k);
+                printf("Mes fils sont : ");
+                k=k+pas;
+                for (size_t l = 0; l < nombre_app; l++)
+                {
+                    printf("%d ", tab_pid_fils[l]);
+                }
+                
+                printf("\n");
+                
+                fflush(stdout); 
+                sleep(pas);
+            }      
     }
     
     return EXIT_SUCCESS;
 }
+
+
+

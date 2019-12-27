@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 				}
 			return CODE_RETOUR_FILS;
 
-		default:
+		default:	
 			/* Retour du fork() != 0 donc c'est le pere */
 			for(i=delais_pere; i>0; i=i-2)
 				{
