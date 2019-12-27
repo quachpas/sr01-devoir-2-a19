@@ -70,8 +70,10 @@ int main(int argc, char const *argv[])
     char buff[50]; // Buffer
     char **nom;
     char **path;
+    char s_path[50];
     char **nombre_arg;
     char **args;
+    char s_args[50];
     
     int who_am_i;
     char *ptr;
@@ -187,7 +189,9 @@ int main(int argc, char const *argv[])
             printf("[id_proc=%d]\n", id_processus);
             printf("[%s][%d]\n", nom[id_processus], getpid());
             printf("Je vais exécuter la commande suivante :\n%s %s\n\n", path[id_processus], args[id_processus]);    
-            execl(path[id_processus], args[id_processus]);
+            strcpy(s_path, path[id_processus]);
+            strcpy(s_args, args[id_processus]);
+            execl(s_path, s_args);
             return CODE_RETOUR_FILS;
 
         default:
