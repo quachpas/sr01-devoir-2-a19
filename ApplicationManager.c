@@ -11,16 +11,47 @@
 
 #define CODE_RETOUR_FILS 4
 #define DUREE 10
+#define MAX_BUFF_SIZE 1024
 
-pid_t pid, pid_fils;
+pid_t pid, *tab_pid_fils;
 int fd[2];
 
-void intercepter(int n)
+void intercepter(int n, siginfo_t *signal_info)
 {
     int i, statut_fils;
-    char name[50];
-    read(fd[0], name, 50*sizeof(char));    
-    printf("\n [%s] (PID=%d SIGCHLD=%d ) Réception du signal %d\n\n", name, pid, SIGCHLD, n);
+    char *pnt, name[50];
+    pid_t pid_fils = signal_info->si_pid; // PID du fils qui a envoyé un SIGCHLD
+    //printf("<--------- PID = %d ------->", pid_fils);
+
+    /* ID_PROCESSUS */  
+    int id_processus = 0;
+    while (pid_fils != tab_pid_fils[id_processus]) {
+        printf("<--------- [intercepter] tab_pid_fils[%d] = %d ------------>\n", id_processus, tab_pid_fils[id_processus]);
+        printf("<--------- [intercepter]        PID = %d       ------------>\n", pid_fils);
+        id_processus++;
+    }
+
+    /* LECTURE NOMS */
+    char names[MAX_BUFF_SIZE];
+    read(fd[0], names, MAX_BUFF_SIZE);
+    // On va chercher le nom correspondant à l'id_processus. 
+    if (id_processus == 0)
+    {
+        strcpy(name, names);
+    }
+    else 
+    {
+        for (size_t i = 0; i < id_processus; i++)
+        {
+            pnt = strchr(names, '\0')+1; 
+        }
+        strcpy(name, pnt);
+    }
+    printf("<----------- [intercepter] NAME = %s ----------->\n", name);
+
+
+    /* TRAITEMENT DU SIGNAL */
+    printf("\n [%s] (PID=%d SIGCHLD=%d ) Réception du signal %d\n\n", name, pid_fils, SIGCHLD, n);
     // (INT=2, TERM=15, QUIT=3)
 	
     
@@ -84,11 +115,12 @@ int main(int argc, char const *argv[])
     struct sigaction S;
     S.sa_handler = intercepter;
     sigemptyset(&S.sa_mask);
-    S.sa_flags = SA_RESTART | SA_NOCLDSTOP | SA_NOCLDWAIT;
+    S.sa_flags = SA_RESTART | SA_NOCLDSTOP | SA_NOCLDWAIT | SA_SIGINFO;
     if( sigaction(SIGCHLD, &S, NULL) != 0 )
     {
         perror("sigaction");
     }
+    pid_t pid_fils;
 
     // La fonction qui s'occupe des sig est intercepter()
     pid = getpid();
@@ -108,7 +140,6 @@ int main(int argc, char const *argv[])
     int j,k;
     int n;
     int est_parent=1;
-    int *tab_pid_fils;
 
     FILE* pnt = fopen("./list_appli.txt", "r");
     if (!pnt) {
@@ -118,7 +149,7 @@ int main(int argc, char const *argv[])
     n = fgets(buff, 50, pnt);
     nombre_app = atoi(strrchr(buff, '=')+1); // On récupère le nombre d'app
     /* INITIALISATION DES TABLEAUX */
-    tab_pid_fils = malloc(nombre_app*sizeof(int));
+    tab_pid_fils = malloc(nombre_app*sizeof(pid_t));
     s_args_v = malloc(sizeof(char*)*nombre_app);
 
     
@@ -302,7 +333,13 @@ int main(int argc, char const *argv[])
                 strcpy(s_args_v[id_processus][1], args[id_processus]);
                 break;
         }
-        write(fd[1], nom[id_processus], strlen(nom[id_processus])+1); // On passe le nom de l'app à intercepter
+         // On passe les noms des app à intercepter
+        for (size_t k = 0; k < nombre_app; k++)
+        {
+            write(fd[1], nom[k], strlen(nom[k])+1);
+            //write(fd[1], '\n', 1); // separateur
+        }
+        
         /*printf("<------------ [ID=%d] s_args_v = ", id_processus);
         for (size_t k = 0; k <= atoi(nombre_arg[id_processus])+1; k++)
         {
