@@ -585,7 +585,7 @@ Modifier le programme \texttt{power\_manager.c} pour envoyer le signal \texttt{\
 On récupère le \texttt{PPID} à l'aide de la fonction \texttt{getppid()}. Ensuite, on envoie un signal \texttt{\textbf{SIGUSR1}} à l'aide de la fonction \texttt{kill}.
 
 
-%\textbf{N.B. : Lorsque les tests ont été réalisé sur une machine dôtée de Ubuntu 18.04, la modification du fichier \texttt{mise_en_veille.txt} pour remplacer le \texttt{0} par un \texttt{1} provoque la modification instantanée du fichier du \texttt{1} au \texttt{0}. C'est bien le processus qui gère l'application \texttt{power_manager} qui ... NVM. ça marche sur la machine de Korantin.}
+\textbf{N.B. : Lorsque les tests ont été réalisé sur une machine dotée de Ubuntu 18.04, la modification du fichier \texttt{mise\_en\_veille.txt} pour remplacer le \texttt{0} par un \texttt{1} provoque la modification instantanée du fichier du \texttt{1} au \texttt{0}. C'est bien le processus qui gère l'application \texttt{power\_manager} qui va modifier le fichier pour le transformer. Le processus ne dort pas réellement. C'est très étrange. Le comportement attendu est que toutes les 4 secondes, ce processus va vérifier si le \texttt{0} n'est pas un \texttt{1}. Dans ce cas, il envoie un signal \texttt{\textbf{SIGUSR1}} au processus parent. Ce processus parent va donc alors initier la séquence d'instructions décrite plus haut.}
 %----------------------------------------------------------------------------------------
 
 \section*{Exercice 3}
