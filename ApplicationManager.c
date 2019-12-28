@@ -95,7 +95,7 @@ int main(int argc, char const *argv[])
     char s_path[50];
     char **nombre_arg;
     char **args;
-    char s_args[50];
+    char ***s_args_v;
 
     int who_am_i;
     char *ptr;
@@ -116,7 +116,9 @@ int main(int argc, char const *argv[])
     nombre_app = atoi(strrchr(buff, '=')+1); // On récupère le nombre d'app
     /* INITIALISATION DES TABLEAUX */
     tab_pid_fils = malloc(nombre_app*sizeof(int));
+    s_args_v = malloc(sizeof(char*)*nombre_app);
 
+    
     nom = malloc(nombre_app*sizeof(char*));
     double_pointer_malloc(nom, nombre_app);
     path = malloc(nombre_app*sizeof(char*));
@@ -150,7 +152,7 @@ int main(int argc, char const *argv[])
                 if (atoi(nombre_arg[i])>0) 
                 {
                     fgets(buff, 100, pnt); // Sauter 'arguments='
-                    strcpy(args[i], buff); // Copier le premier arg                
+                    strcpy(args[i], buff); // Copier le premier arg   
                     strrchr(args[i], '\n')[0]=' ';
                     fflush(stdout); 
                     for (j=2;j<=atoi(nombre_arg[i]);j++) {
@@ -221,11 +223,85 @@ int main(int argc, char const *argv[])
         printf("<-------------- %s ------------>\n", nom[id_processus]);
         printf("[id_proc=%d][%s][%d]\n", id_processus, nom[id_processus], getpid());
         printf("Je vais exécuter la commande suivante :\n%s %s\n\n", path[id_processus], args[id_processus]);    
-        strcpy(s_path, path[id_processus]);
-        strcpy(s_args, args[id_processus]);
-        write(fd[1], nom[id_processus], strlen(nom[id_processus])+1); // On passe le nom de l'app à intercepter
-        execl(s_path, s_args);
         
+        strcpy(s_path, path[id_processus]); // path
+
+        // argv
+        printf("<---------- [ID=%d] malloc s_args_v[%d] -------->\n", id_processus, id_processus);
+        s_args_v[id_processus] = malloc(sizeof(char*)*atoi(nombre_arg[0])+1); // path + nombre_arg = nombre_arg +1
+        printf("<---------- [ID=%d] malloc2 s_args_v[%d][0,...,%d] -------->\n", id_processus, id_processus, atoi(nombre_arg[id_processus])+1);
+        double_pointer_malloc(s_args_v[id_processus], atoi(nombre_arg[0])+1);
+        if(id_processus == 0)
+        {
+            printf("<---------- [ID=%d] malloc2 check : s_args_v[0][2] exists := %d -------->\n", id_processus, s_args_v[0][2]);
+        }
+        printf("<---------- [ID=%d] Copying path -------->\n", id_processus);
+        strcpy(s_args_v[id_processus][0], path[id_processus]);// argv[0] = path
+        printf("<-------- [ID=%d] s_args_v[%d][0] = %s -------->\n", id_processus, id_processus, s_args_v[id_processus][0]);
+        printf("<---------- [ID=%d] Copying args -------->\n", id_processus);
+        switch (atoi(nombre_arg[id_processus])) 
+        {
+            case 0:
+                printf("<-------- [ID=%d] nombre arg = %d -------->\n", id_processus, atoi(nombre_arg[id_processus]));
+                s_args_v[id_processus][1] = '\0';
+                printf("<-------- [ID=%d] s_args_v[%d][1] = %s -------->\n", id_processus, id_processus, s_args_v[id_processus][1]);
+                break;
+            case 1:
+                printf("<-------- [ID=%d] nombre arg = %d -------->\n", id_processus, atoi(nombre_arg[id_processus]));
+                strcpy(s_args_v[id_processus][1], args[id_processus]);
+                printf("<-------- [ID=%d] s_args_v[%d][1] = %s -------->\n", id_processus, id_processus, s_args_v[id_processus][1]);
+                break;
+            default:
+                printf("<-------- [ID=%d] nombre arg = %d -------->\n", id_processus, atoi(nombre_arg[id_processus]));
+                for (size_t k = atoi(nombre_arg[id_processus]); k >= 2; k--)
+                {
+                    printf("<---------- [ID=%d][iteration=%d] Copying args -------->\n", id_processus, k);
+                    if (strrchr(args[id_processus], ' ')+1) 
+                    {
+                        printf("<---------- [ID=%d][iteration=%d] Copying args : check, args_[id_processus]+1 exists -------->\n", id_processus, k);
+                        printf("<---------- [ID=%d][iteration=%d] args_[id_processus]+1 =  _%s_ -------->\n", id_processus, k, strrchr(args[id_processus], ' ')+1);
+                    }
+                    printf("<---------- [ID=%d][iteration=%d] s_args_v[%d][%d] size check : _%d_-------->\n", id_processus, k, id_processus, k, sizeof(s_args_v[id_processus][k]));
+                    printf("<---------- [ID=%d][iteration=%d] size check : is s_args_v[%d][%d] >= %s. BOOL = _%d_  -------->\n", id_processus, k, id_processus, k, strrchr(args[id_processus], ' ')+1, sizeof(strrchr(args[id_processus], ' ')+1) <= sizeof(s_args_v[id_processus][k]));
+                    printf("<---------- [ID=%d][iteration=%d] Creating pointer to last arg in args[] -------->\n", id_processus, k);
+                    char* pnt_source = strrchr(args[id_processus], ' ')+1;
+                    if (pnt_source)
+                    {
+                        printf("<---------- [ID=%d][iteration=%d] Pointer successfully created. Points to : _%s_ -------->\n", id_processus, k, pnt_source);
+                    }
+                    else
+                    {
+                        printf("<---------- [ID=%d][iteration=%d] You're a failure of a pointer damn it -------->\n", id_processus, k);
+                    }
+                    printf("<---------- [ID=%d][iteration=%d] Dest array existence check := _%d_ -------->\n", id_processus, k, s_args_v[id_processus][k]);
+                    printf("<---------- [ID=%d][iteration=%d] Dest array access check ... -------->\n", id_processus, k);
+                    char * pnt_dest = s_args_v[id_processus][k];
+                    if (pnt_dest)
+                    {
+                        printf("<---------- [ID=%d][iteration=%d] Pointer successfully created. Points to : _%s_ -------->\n", id_processus, k, pnt_dest);
+                    }
+                    else
+                    {
+                        printf("<---------- [ID=%d][iteration=%d] You're a failure of a pointer damn it -------->\n", id_processus, k);
+                    }
+                    strcpy(pnt_dest, pnt_source);
+                    strrchr(args[id_processus], ' ')[0] = '\0';
+                    printf("<---------- [ID=%d][iteration=%d] s_args_v[%d][%d] = %s -------->\n", id_processus, k, id_processus, k, s_args_v[id_processus][k]);
+                }
+                strcpy(s_args_v[id_processus][1], args[id_processus]);
+                break;
+        }
+        write(fd[1], nom[id_processus], strlen(nom[id_processus])+1); // On passe le nom de l'app à intercepter
+        printf("<------------ [ID=%d] s_args_v = ", id_processus);
+        for (size_t k = 0; k < atoi(nombre_arg[id_processus])+1; k++)
+        {
+            printf("%s ", s_args_v[id_processus][k]);
+        }
+        printf("----------->\n");
+        
+        
+        execv(s_path, s_args_v[id_processus]);
+
         return CODE_RETOUR_FILS;
     default:
         // Le père !
@@ -233,7 +309,8 @@ int main(int argc, char const *argv[])
         // Le parent reste ici :) jusqu'au sigterm, à changer plus tard
         
         //printf("<-------------- %s ------------>\n", nom[id_processus]);
-        //write(fd[1], nom[id_processus], strlen(nom[id_processus])+1);
+        //write(fd[1], nom[id_processus], strlen(nom[id_processus])+1);           
+        
         sleep(1);
             int k = 0;
             int pas = 10;
