@@ -26,8 +26,7 @@ void intercepter(int n, siginfo_t *signal_info)
     /* ID_PROCESSUS */  
     int id_processus = 0;
     while (pid_fils != tab_pid_fils[id_processus]) {
-        printf("<--------- [intercepter] tab_pid_fils[%d] = %d ------------>\n", id_processus, tab_pid_fils[id_processus]);
-        printf("<--------- [intercepter]        PID = %d       ------------>\n", pid_fils);
+        //printf("<--------- [intercepter][PID = %d] tab_pid_fils[%d] = %d ------------>\n|\n|\n", pid_fils, id_processus, tab_pid_fils[id_processus]);
         id_processus++;
     }
 
@@ -41,13 +40,15 @@ void intercepter(int n, siginfo_t *signal_info)
     }
     else 
     {
+        pnt = names;
         for (size_t i = 0; i < id_processus; i++)
         {
-            pnt = strchr(names, '\0')+1; 
+            pnt = strchr(pnt, '\0')+1;
+
         }
         strcpy(name, pnt);
     }
-    printf("<----------- [intercepter] NAME = %s ----------->\n", name);
+    //printf("<----------- [intercepter] NAME = %s ----------->\n", name);
 
 
     /* TRAITEMENT DU SIGNAL */
@@ -57,36 +58,36 @@ void intercepter(int n, siginfo_t *signal_info)
     
 	if ( waitpid(pid_fils, statut_fils, WNOHANG | WCONTINUED) == -1 )
     {
-        printf("<------------- %s ------------>\n ", name);
+        printf("<------------- [intercepter] %s ------------>\n", name);
         perror("intercepter/waitpid");  
         printf("\n");
     }
 	else 
     {
-        printf("<----- [%s] PID=%d ------->\n", name, pid_fils);
+        printf("<----- [intercepter][%s] PID=%d ------->\n", name, pid_fils);
 
-        printf("<----- WIFEXITED=%d -------->\n", WIFEXITED(statut_fils));
+        printf("<----- [intercepter] WIFEXITED=%d -------->\n", WIFEXITED(statut_fils));
         if( WIFEXITED(statut_fils) != 0 )
         {
-            printf("\n[%s] Fin normale du fils (%d) avec code retour %d\n\n", name, pid_fils, WEXITSTATUS(statut_fils));
+            printf("\n[intercepter][%s] Fin normale du fils (%d) avec code retour %d\n\n", name, pid_fils, WEXITSTATUS(statut_fils));
         }
 
-        printf("<----- WIFSIGNALED=%d ------>\n", WIFSIGNALED(statut_fils));
+        printf("<----- [intercepter] WIFSIGNALED=%d ------>\n", WIFSIGNALED(statut_fils));
         if( WIFSIGNALED(statut_fils) != 0 )
         {
-            printf("\n[%s] Fin du fils (%d) via signal %d non intercepte\n\n", name, pid_fils, WTERMSIG(statut_fils));
+            printf("\n[intercepter][%s] Fin du fils (%d) via signal %d non intercepte\n\n", name, pid_fils, WTERMSIG(statut_fils));
         }
 
-        printf("<------ WIFSTOPPED=%d ------>\n", WIFSTOPPED(statut_fils));
+        printf("<------ [intercepter] WIFSTOPPED=%d ------>\n", WIFSTOPPED(statut_fils));
         if( WIFSTOPPED(statut_fils) != 0 )
         {
-            printf("\n[%s] Processus fils (%d) stoppe par signal %d\n\n", name, pid_fils, WSTOPSIG(statut_fils));
+            printf("\n[intercepter][%s] Processus fils (%d) stoppe par signal %d\n\n", name, pid_fils, WSTOPSIG(statut_fils));
         }
 
-        printf("<----- WIFCONTINUED=%d ----->\n", WIFCONTINUED(statut_fils));
+        printf("<----- [intercepter] WIFCONTINUED=%d ----->\n", WIFCONTINUED(statut_fils));
         if( WIFCONTINUED(statut_fils) != 0 )
         {
-            printf("\n[%s] Processus fils (%d) continue\n\n", name, pid_fils);
+            printf("\n[intercepter][%s] Processus fils (%d) continue\n\n", name, pid_fils);
         }
     }
 }
@@ -364,13 +365,12 @@ int main(int argc, char const *argv[])
         ////printf("<-------------- %s ------------>\n", nom[id_processus]);
         //write(fd[1], nom[id_processus], strlen(nom[id_processus])+1);           
         
-        int k = 0;
+        
         unsigned int pas = 20;
         while(1)
         {
-            printf("\n\n[parent][PID=%d]Processus père vit depuis %d secondes\n", getpid(), k);
+            printf("\n\n[parent][PID=%d]Processus père vit\n", getpid());
             printf("Mes fils sont : ");
-            k=k+pas;
             for (size_t l = 0; l < nombre_app; l++)
             {
                 printf("%d ", tab_pid_fils[l]);
@@ -379,16 +379,18 @@ int main(int argc, char const *argv[])
             printf("\n");
             
             sleep(20);
-            // Tuer tous les fils   
             
+            // Tuer tous les fils [Inclure ici]
             
+                   
         }   
+        // Pour tuer les processus, inclure dans la boucle infini.
         for (size_t l = 0; l < nombre_app; l++)
         {
-            printf("<------------ KILL(%d, SIGTERM) ---------->\n", tab_pid_fils[l]);
+            //printf("<------------ KILL(%d, SIGTERM) ---------->\n", tab_pid_fils[l]);
             kill(tab_pid_fils[l], SIGTERM);
             //sleep(1);
-        }   
+        }
     }
     free(tab_pid_fils);
     double_pointer_free(nom, nombre_app);
