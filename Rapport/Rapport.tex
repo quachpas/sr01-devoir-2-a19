@@ -33,6 +33,8 @@
 \usepackage{verbatim}
 \usepackage{cancel}
 
+\usepackage[htt]{hyphenat}
+
 \usepackage{graphics,graphicx} % Required for including images
 \graphicspath{{images/}{../images/}}
 \usepackage{booktabs} % Required for better horizontal rules in tables	
@@ -561,15 +563,31 @@ On va programmer un gestionnaire d'applications personnalisé (\texttt{Applicati
 \end{itemize}
 \textbf{NB} : Lorsque \texttt{ApplicationManager} reçoit un signal \texttt{\textbf{SIGUSR1}} de la part d'un autre processus, il ne ferme pas les applications.
 \subsection*{Réponse}
+\begin{enumerate}
+\item On vient d'abord lire les informations dans le fichier. On crée ensuite un semble de processus fils qui auront chacun un \texttt{id\_processus} unique qui correspond à l'ordre dans lequel ils ont été lu. Les \texttt{PID}s des fils sont stockés dans une variable globale \texttt{pid\_t *tab\_pid\_fils}. Après avoir traité \texttt{path} et \texttt{argv}, on exécute les commandes qui lancent les applications.
+	\item On utilise un \textit{signal handler} de prototype \texttt{intercepter(int n, siginfo\_t *signal\_info)} défini par \texttt{sigaction}, i.e. \texttt{struct sigaction S.sa\_handler = intercepter}. On fait correspondre le \texttt{PID} du processus qui a envoyé le signal avec son emplacement dans le tableau \texttt{tab\_pid\_fils} pour obtenir son \texttt{id\_processus}. De là, le processus père a envoyé la liste de tous les noms par un \textit{pipe} à \texttt{intercepter}. Il suffit de récupérer le bon nom de l'application pour ensuite l'afficher lors du traitement du signal. On vérifie le statut du fils à l'aide de la fonction \texttt{waitpid}, puis on détermine ce qui lui est arrivé à l'aide des \textit{flags} : \texttt{WIFEXITED}, \texttt{WIFSIGNALED}, \texttt{WIFSTOPPED}, \texttt{WIFCONTINUED}. 
+	\item La réception d'un signal \texttt{\textbf{SIGUSR1}} est vérifié dans \texttt{intercepter}. On vérifie que le signal envoyé est bien celui de \texttt{\textbf{SIGUSR1}}, \texttt{n == \textbf{SIGUSR1}}, que l'\texttt{id\_processus} est bien 0 et que le nom du processus qui a activé le \textit{signal handler} est bien \texttt{"Power Manager"}. On éteint ensuite toutes les applications, puis enfin on quitte le process en utilisant \texttt{exit}. 	
+\end{enumerate}
+
+	
+%\lstinputlisting[
+%		caption=Partie 2 - Programme en \texttt{C},% Caption above the listing
+%		label=lst:app_manager, % Label for referencing this listing
+%		style=cstyle
+%	]{ApplicationManager.c}
+
 %----------------------------------------------------------------------------------------
 
 \subsection*{Question 2}
 Modifier le programme \texttt{power\_manager.c} pour envoyer le signal \texttt{\textbf{SIGUSR1}} à l'\texttt{ApplicationManager} lorsque l'utilisateur tape 1 dans le fichier \texttt{mise\_en\_veille.txt}.
 
 \subsection*{Réponse}
+On récupère le \texttt{PPID} à l'aide de la fonction \texttt{getppid()}. Ensuite, on envoie un signal \texttt{\textbf{SIGUSR1}} à l'aide de la fonction \texttt{kill}.
 
+
+%\textbf{N.B. : Lorsque les tests ont été réalisé sur une machine dôtée de Ubuntu 18.04, la modification du fichier \texttt{mise_en_veille.txt} pour remplacer le \texttt{0} par un \texttt{1} provoque la modification instantanée du fichier du \texttt{1} au \texttt{0}. C'est bien le processus qui gère l'application \texttt{power_manager} qui ... NVM. ça marche sur la machine de Korantin.}
 %----------------------------------------------------------------------------------------
-\newpage
+
 \section*{Exercice 3}
 L'objectif de cet exercice est de paralléliser le calcul de la somme ou le produit de deux matrices.
 La somme et le produit doivent se faire en parallèle, donc une approche dans laquelle le processus père attend la fin du traitement réalisé par un fils afin d'en créer un autre ne sera pas acceptée.
@@ -598,13 +616,13 @@ On commence par une lecture des fichiers passés en arguments du main, puis on l
 On crée ensuite n tableaux pour n pipes, un par processus.
 Ensuite, on crée un processus par ligne qui calcule la somme des éléments, puis l'on écrit dans le pipe de ce processus.
 Enfin, on lit tous les résultats et on les affiche.
-\lstinputlisting[
-		caption=Programme Somme.c,% Caption above the listing
-		label=lst:somme, % Label for referencing this listing
-		style=cstyle
-	]{Somme.c}
+%\lstinputlisting[
+%		caption=Programme Somme.c,% Caption above the listing
+%		label=lst:somme, % Label for referencing this listing
+%		style=cstyle
+%	]{Somme.c}
 %----------------------------------------------------------------------------------------
-\newpage
+
 \subsection*{Question 2}
 \begin{problem}
 De même, créez un programme \texttt{Produit.c} qui reçoit les mêmes paramètres que le programme \texttt{Somme.c} mais qui effectue le produit de deux matrices. 
@@ -618,13 +636,13 @@ De même, créez un programme \texttt{Produit.c} qui reçoit les mêmes paramèt
 \subsection*{Réponse}
 
 Seul le calcul est différent du programme précédent, on ajoute une boucle pour parcourir toutes les colonnes de la première matrice et toutes les lignes de la seconde à chaque itération.
-\lstinputlisting[
-		caption=Programme Produit.c,% Caption above the listing
-		label=lst:produit, % Label for referencing this listing
-		style=cstyle
-	]{Produit.c}
+%\lstinputlisting[
+%		caption=Programme Produit.c,% Caption above the listing
+%		label=lst:produit, % Label for referencing this listing
+%		style=cstyle
+%	]{Produit.c}
 %----------------------------------------------------------------------------------------
-\newpage
+
 \subsection*{Question 3}
 \begin{problem}
 Créez un programme \texttt{ManipMatrice.c} qui permet de :
@@ -637,12 +655,12 @@ Créez un programme \texttt{ManipMatrice.c} qui permet de :
 \subsection*{Réponse}
 
 Dans cette question, on va demander à l'utilisateur d'entrer deux matrices (stockées dans les fichiers "matrice1" et "matrice2"). On supposera les deux programmes déja compilés dans le même dossier sous le nom "Somme" et "Produit". On génere alors les matrices aléatoirement ou selon les entrées utilisateurs, puis on appelle les programmes précédents en utilisant execv.
-\newpage
-\lstinputlisting[
-		caption=Programme ManipMatrice.c,% Caption above the listing
-		label=lst:manip, % Label for referencing this listing
-		style=cstyle
-	]{ManipMatrice.c}
+
+%\lstinputlisting[
+%		caption=Programme ManipMatrice.c,% Caption above the listing
+%		label=lst:manip, % Label for referencing this listing
+%		style=cstyle
+%	]{ManipMatrice.c}
 	
 	%----------------------------------------------------------------------------------------
 %	ASSIGNMENT CONTENT
